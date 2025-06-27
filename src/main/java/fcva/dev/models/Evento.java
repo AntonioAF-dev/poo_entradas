@@ -7,7 +7,6 @@ public class Evento {
     private String lugar;
     private int totalEntradas;
 
-    // Constructor para nuevos eventos (sin ID)
     public Evento(String nombre, String fecha, String lugar, int totalEntradas) {
         this.nombre = nombre;
         this.fecha = fecha;
@@ -15,7 +14,6 @@ public class Evento {
         this.totalEntradas = totalEntradas;
     }
 
-    // Constructor para eventos con ID (editar, listar, etc.)
     public Evento(int id, String nombre, String fecha, String lugar, int totalEntradas) {
         this.id = id;
         this.nombre = nombre;
@@ -24,7 +22,6 @@ public class Evento {
         this.totalEntradas = totalEntradas;
     }
 
-    // Getters
     public int getId() {
         return id;
     }
@@ -45,7 +42,6 @@ public class Evento {
         return totalEntradas;
     }
 
-    // Setters (si los necesitas)
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }

@@ -1,7 +1,9 @@
 package fcva.dev.dao;
 
-import fcva.dev.models.Entrada;
 import fcva.dev.database.DatabaseConnection;
+import fcva.dev.models.Cliente;
+import fcva.dev.models.Entrada;
+import fcva.dev.models.Evento;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -32,7 +34,35 @@ public class EntradaDAOImpl implements EntradaDAO {
     @Override
     public List<Entrada> obtenerTodas() {
         List<Entrada> entradas = new ArrayList<>();
-        // No se implementa aún por falta de relación directa a objetos Evento y Cliente en DB
+        String sql = "SELECT * FROM entradas";
+
+        try (Connection conn = DatabaseConnection.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Cliente cliente = new Cliente(
+                        rs.getString("cliente_nombre"),
+                        rs.getString("cliente_email")
+                );
+
+                Evento evento = new Evento(
+                        rs.getString("evento_nombre"), "", "", 0
+                );
+
+                Entrada entrada = new Entrada(evento, cliente);
+                // Sobrescribimos el código generado con el real
+                java.lang.reflect.Field codigoField = Entrada.class.getDeclaredField("codigo");
+                codigoField.setAccessible(true);
+                codigoField.set(entrada, rs.getString("codigo"));
+
+                entradas.add(entrada);
+            }
+
+        } catch (Exception e) {
+            System.out.println("❌ Error al obtener entradas: " + e.getMessage());
+        }
+
         return entradas;
     }
 }

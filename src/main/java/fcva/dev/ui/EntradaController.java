@@ -37,7 +37,7 @@ public class EntradaController {
             System.out.println("- " + e.getNombre());
         }
 
-        System.out.println("🔍 Ingrese el nombre del evento:");
+        System.out.print("🔍 Ingrese el nombre del evento: ");
         String nombreEvento = scanner.nextLine();
         Evento evento = eventoDAO.buscarPorNombre(nombreEvento);
 
@@ -48,10 +48,10 @@ public class EntradaController {
 
         eventoView.mostrarEvento(evento);
 
-        System.out.println("👤 Ingrese su nombre:");
+        System.out.print("👤 Ingrese su nombre: ");
         String nombreCliente = scanner.nextLine();
 
-        System.out.println("📧 Ingrese su correo electrónico:");
+        System.out.print("📧 Ingrese su correo electrónico: ");
         String emailCliente = scanner.nextLine();
 
         Cliente cliente = new Cliente(nombreCliente, emailCliente);
@@ -62,7 +62,6 @@ public class EntradaController {
             entradaDAO.guardar(entrada);
             entradaView.mostrarEntrada(entrada);
 
-            // Actualizar disponibilidad local (opcional)
             evento.setTotalEntradas(evento.getEntradasDisponibles() - 1);
             eventoDAO.actualizar(evento);
         } else {

@@ -1,34 +1,41 @@
+// Importaciones
 package fcva.dev.ui;
 
-import fcva.dev.dao.EventoDAO;
-import fcva.dev.dao.EventoDAOImpl;
 import fcva.dev.dao.EntradaDAO;
 import fcva.dev.dao.EntradaDAOImpl;
+import fcva.dev.dao.EventoDAO;
+import fcva.dev.dao.EventoDAOImpl;
 import fcva.dev.models.Cliente;
 import fcva.dev.models.Entrada;
 import fcva.dev.models.Evento;
+import fcva.dev.models.Vendedor;
+import fcva.dev.util.PDFExporter;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.*;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class AppDashboard extends JFrame {
 
     private EventoDAO eventoDAO = new EventoDAOImpl();
     private EntradaDAO entradaDAO = new EntradaDAOImpl();
+    private Vendedor vendedor;
 
-    // Componentes de Eventos
     private JTextField nombreField, fechaField, lugarField, totalEntradasField, buscarField;
     private JButton agregarBtn, editarBtn, eliminarBtn, limpiarBtn, buscarBtn;
     private JTable tablaEventos;
     private DefaultTableModel modeloTabla;
     private int eventoSeleccionadoId = -1;
 
-    public AppDashboard() {
-        setTitle("🎫 Sistema de Gestión de Entradas");
-        setSize(800, 600);
+    private JComboBox<String> eventoCombo;
+    private DefaultTableModel historialModelo;
+
+    public AppDashboard(Vendedor vendedor) {
+        this.vendedor = vendedor;
+        setTitle("🎫 Sistema de Gestión de Entradas - Bienvenido " + vendedor.getNombre());
+        setSize(900, 650);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         initUI();
@@ -37,12 +44,29 @@ public class AppDashboard extends JFrame {
 
     private void initUI() {
         JTabbedPane tabs = new JTabbedPane();
-        tabs.addTab("Eventos", construirPanelEventos());
-        tabs.addTab("Entradas", construirPanelEntradas());
+
+        JPanel eventosPanel = construirPanelEventos();
+        JPanel entradasPanel = construirPanelEntradas();
+        JPanel historialPanel = construirPanelHistorial();
+
+        tabs.addTab("Eventos", eventosPanel);
+        tabs.addTab("Entradas", entradasPanel);
+        tabs.addTab("Historial", historialPanel);
+
+        tabs.addChangeListener(e -> {
+            int index = tabs.getSelectedIndex();
+            String title = tabs.getTitleAt(index);
+            if (title.equals("Entradas")) {
+                actualizarComboEventos(eventoCombo);
+            }
+            if (title.equals("Historial")) {
+                actualizarHistorial();
+            }
+        });
+
         add(tabs);
     }
 
-    // Panel de Eventos (CRUD)
     private JPanel construirPanelEventos() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         JPanel formPanel = new JPanel(new GridLayout(6, 2, 10, 5));
@@ -75,8 +99,7 @@ public class AppDashboard extends JFrame {
 
         modeloTabla = new DefaultTableModel(new Object[]{"ID", "Nombre", "Fecha", "Lugar", "Entradas"}, 0);
         tablaEventos = new JTable(modeloTabla);
-        JScrollPane scrollPane = new JScrollPane(tablaEventos);
-        panel.add(scrollPane, BorderLayout.CENTER);
+        panel.add(new JScrollPane(tablaEventos), BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         buscarField = new JTextField(20);
@@ -118,11 +141,16 @@ public class AppDashboard extends JFrame {
                 return;
             }
 
+            if (!fecha.matches("\\d{2}/\\d{2}/\\d{4}")) {
+                JOptionPane.showMessageDialog(this, "Formato de fecha inválido (dd/mm/aaaa)", "❌ Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             int total;
             try {
                 total = Integer.parseInt(totalStr);
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Entradas debe ser un número", "❌ Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Entradas debe ser numérico", "❌ Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -156,6 +184,11 @@ public class AppDashboard extends JFrame {
 
             if (nombre.isEmpty() || fecha.isEmpty() || lugar.isEmpty() || totalStr.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Completa todos los campos", "⚠️ Advertencia", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (!fecha.matches("\\d{2}/\\d{2}/\\d{4}")) {
+                JOptionPane.showMessageDialog(this, "Formato de fecha inválido (dd/mm/aaaa)", "❌ Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -212,19 +245,39 @@ public class AppDashboard extends JFrame {
         tablaEventos.clearSelection();
     }
 
-    // Panel de Entradas (Venta)
+    private JPanel construirPanelHistorial() {
+        JPanel panel = new JPanel(new BorderLayout());
+        historialModelo = new DefaultTableModel(new Object[]{"Código", "Cliente", "Email", "Evento"}, 0);
+        JTable tabla = new JTable(historialModelo);
+        panel.add(new JScrollPane(tabla), BorderLayout.CENTER);
+        return panel;
+    }
+
+    private void actualizarHistorial() {
+        historialModelo.setRowCount(0);
+        for (Entrada entrada : entradaDAO.obtenerTodas()) {
+            historialModelo.addRow(new Object[]{
+                    entrada.getCodigo(),
+                    entrada.getCliente().getNombre(),
+                    entrada.getCliente().getEmail(),
+                    entrada.getEvento().getNombre()
+            });
+        }
+    }
+
     private JPanel construirPanelEntradas() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         JPanel formPanel = new JPanel(new GridLayout(6, 2, 10, 5));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        JComboBox<String> eventoCombo = new JComboBox<>();
+        eventoCombo = new JComboBox<>();
         JTextField clienteNombreField = new JTextField();
         JTextField clienteEmailField = new JTextField();
         JTextArea resultadoArea = new JTextArea(6, 40);
         resultadoArea.setEditable(false);
 
         JButton comprarBtn = new JButton("Comprar Entrada");
+        JButton pdfBtn = new JButton("Exportar PDF");
 
         actualizarComboEventos(eventoCombo);
 
@@ -234,11 +287,13 @@ public class AppDashboard extends JFrame {
         formPanel.add(clienteNombreField);
         formPanel.add(new JLabel("Email del cliente:"));
         formPanel.add(clienteEmailField);
-        formPanel.add(new JLabel()); // espacio vacío
         formPanel.add(comprarBtn);
+        formPanel.add(pdfBtn);
 
         panel.add(formPanel, BorderLayout.NORTH);
         panel.add(new JScrollPane(resultadoArea), BorderLayout.CENTER);
+
+        final Entrada[] entradaGenerada = {null};
 
         comprarBtn.addActionListener(e -> {
             String eventoNombre = (String) eventoCombo.getSelectedItem();
@@ -262,6 +317,11 @@ public class AppDashboard extends JFrame {
                 return;
             }
 
+            if (!Pattern.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$", email)) {
+                resultadoArea.setText("❌ Email inválido.");
+                return;
+            }
+
             Cliente cliente = new Cliente(nombre, email);
             Entrada entrada = new Entrada(evento, cliente);
 
@@ -276,6 +336,17 @@ public class AppDashboard extends JFrame {
 
             actualizarComboEventos(eventoCombo);
             cargarEventos();
+            entradaGenerada[0] = entrada;
+        });
+
+        pdfBtn.addActionListener(e -> {
+            if (entradaGenerada[0] == null) {
+                JOptionPane.showMessageDialog(this,
+                "Debe generar una entrada antes de exportar.",
+                "⚠️ Advertencia", JOptionPane.WARNING_MESSAGE);
+            } else {
+                PDFExporter.exportar(entradaGenerada[0]);
+            }
         });
 
         return panel;
