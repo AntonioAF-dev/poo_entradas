@@ -19,7 +19,6 @@ public class VendedorDAOImpl implements VendedorDAO {
 
             stmt.setString(1, usuario);
             stmt.setString(2, contrasena);
-
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
@@ -32,7 +31,7 @@ public class VendedorDAOImpl implements VendedorDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println("❌ Error al autenticar vendedor: " + e.getMessage());
+            throw new RuntimeException("Error al autenticar vendedor: " + e.getMessage(), e);
         }
 
         return null;

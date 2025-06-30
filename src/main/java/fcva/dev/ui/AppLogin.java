@@ -9,13 +9,13 @@ import java.awt.*;
 
 public class AppLogin extends JFrame {
 
-    private JTextField usuarioField;
-    private JPasswordField contrasenaField;
-    private VendedorDAO vendedorDAO = new VendedorDAOImpl();
+    private final JTextField usuarioField = new JTextField();
+    private final JPasswordField contrasenaField = new JPasswordField();
+    private final VendedorDAO vendedorDAO = new VendedorDAOImpl();
 
     public AppLogin() {
-        setTitle("🔐 Inicio de Sesión - Sistema de Entradas");
-        setSize(350, 200);
+        setTitle("Inicio de Sesión - Sistema de Entradas");
+        setSize(400, 280);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         construirUI();
@@ -23,22 +23,69 @@ public class AppLogin extends JFrame {
     }
 
     private void construirUI() {
-        JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
+        try {
+            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        usuarioField = new JTextField();
-        contrasenaField = new JPasswordField();
+        JLabel titulo = new JLabel("Bienvenido al Sistema de Entradas", JLabel.CENTER);
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        titulo.setForeground(new Color(44, 62, 80));
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        panel.add(titulo, gbc);
 
-        panel.add(new JLabel("Usuario:"));
-        panel.add(usuarioField);
-        panel.add(new JLabel("Contraseña:"));
-        panel.add(contrasenaField);
+        gbc.gridwidth = 1;
+        gbc.gridy++;
+        panel.add(new JLabel("Usuario:"), gbc);
+        gbc.gridx = 1;
+        panel.add(usuarioField, gbc);
 
-        JButton loginBtn = new JButton("Ingresar");
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(new JLabel("Contraseña:"), gbc);
+        gbc.gridx = 1;
+        panel.add(contrasenaField, gbc);
+
+        JButton loginBtn = crearBoton("Ingresar", new Color(39, 174, 96), Color.WHITE);
+        JButton salirBtn = crearBoton("Salir", new Color(231, 76, 60), Color.WHITE);
+        JButton limpiarBtn = crearBoton("Limpiar", new Color(41, 128, 185), Color.WHITE);
+
+        JPanel botones = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        botones.add(loginBtn);
+        botones.add(limpiarBtn);
+        botones.add(salirBtn);
+
+        gbc.gridx = 0;
+        gbc.gridy++;
+        gbc.gridwidth = 2;
+        panel.add(botones, gbc);
+
+        add(panel);
+
         loginBtn.addActionListener(e -> iniciarSesion());
+        salirBtn.addActionListener(e -> System.exit(0));
+        limpiarBtn.addActionListener(e -> {
+            usuarioField.setText("");
+            contrasenaField.setText("");
+        });
+    }
 
-        add(panel, BorderLayout.CENTER);
-        add(loginBtn, BorderLayout.SOUTH);
+    private JButton crearBoton(String texto, Color fondo, Color textoColor) {
+        JButton boton = new JButton(texto);
+        boton.setFocusPainted(false);
+        boton.setBackground(fondo);
+        boton.setForeground(textoColor);
+        boton.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        return boton;
     }
 
     private void iniciarSesion() {
@@ -46,18 +93,18 @@ public class AppLogin extends JFrame {
         String contrasena = new String(contrasenaField.getPassword());
 
         if (usuario.isEmpty() || contrasena.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Completa ambos campos.", "⚠️ Advertencia", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Completa ambos campos.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         Vendedor vendedor = vendedorDAO.autenticar(usuario, contrasena);
 
         if (vendedor != null) {
-            JOptionPane.showMessageDialog(this, "✅ Bienvenido " + vendedor.getNombre());
-            dispose(); // cerrar login
-            new AppDashboard(vendedor); // pasar vendedor autenticado
+            JOptionPane.showMessageDialog(this, "Bienvenido " + vendedor.getNombre());
+            dispose();
+            new AppDashboard(vendedor);
         } else {
-            JOptionPane.showMessageDialog(this, "❌ Usuario o contraseña incorrectos.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

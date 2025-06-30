@@ -1,8 +1,8 @@
 package fcva.dev.models;
 
 public class Cliente {
-    private String nombre;
-    private String email;
+    private final String nombre;
+    private final String email;
 
     public Cliente(String nombre, String email) {
         this.nombre = nombre;

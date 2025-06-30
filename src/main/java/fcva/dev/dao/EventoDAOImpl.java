@@ -30,7 +30,7 @@ public class EventoDAOImpl implements EventoDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println("❌ Error al listar eventos: " + e.getMessage());
+            throw new RuntimeException("Error al listar eventos: " + e.getMessage(), e);
         }
 
         return eventos;
@@ -56,7 +56,7 @@ public class EventoDAOImpl implements EventoDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println("❌ Error al buscar evento: " + e.getMessage());
+            throw new RuntimeException("Error al buscar evento: " + e.getMessage(), e);
         }
 
         return null;
@@ -75,10 +75,9 @@ public class EventoDAOImpl implements EventoDAO {
             stmt.setInt(4, evento.getEntradasDisponibles());
 
             stmt.executeUpdate();
-            System.out.println("✅ Evento agregado correctamente.");
 
         } catch (SQLException e) {
-            System.out.println("❌ Error al guardar evento: " + e.getMessage());
+            throw new RuntimeException("Error al guardar evento: " + e.getMessage(), e);
         }
     }
 
@@ -96,10 +95,9 @@ public class EventoDAOImpl implements EventoDAO {
             stmt.setInt(5, evento.getId());
 
             stmt.executeUpdate();
-            System.out.println("✅ Evento actualizado correctamente.");
 
         } catch (SQLException e) {
-            System.out.println("❌ Error al actualizar evento: " + e.getMessage());
+            throw new RuntimeException("Error al actualizar evento: " + e.getMessage(), e);
         }
     }
 
@@ -112,10 +110,9 @@ public class EventoDAOImpl implements EventoDAO {
 
             stmt.setInt(1, id);
             stmt.executeUpdate();
-            System.out.println("✅ Evento eliminado correctamente.");
 
         } catch (SQLException e) {
-            System.out.println("❌ Error al eliminar evento: " + e.getMessage());
+            throw new RuntimeException("Error al eliminar evento: " + e.getMessage(), e);
         }
     }
 }

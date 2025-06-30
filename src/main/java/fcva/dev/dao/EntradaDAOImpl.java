@@ -24,10 +24,9 @@ public class EntradaDAOImpl implements EntradaDAO {
             stmt.setString(4, entrada.getEvento().getNombre());
 
             stmt.executeUpdate();
-            System.out.println("✅ Entrada guardada en la base de datos.");
 
         } catch (SQLException e) {
-            System.out.println("❌ Error al guardar entrada: " + e.getMessage());
+            throw new RuntimeException("Error al guardar entrada: " + e.getMessage(), e);
         }
     }
 
@@ -50,17 +49,15 @@ public class EntradaDAOImpl implements EntradaDAO {
                         rs.getString("evento_nombre"), "", "", 0
                 );
 
-                Entrada entrada = new Entrada(evento, cliente);
-                // Sobrescribimos el código generado con el real
-                java.lang.reflect.Field codigoField = Entrada.class.getDeclaredField("codigo");
-                codigoField.setAccessible(true);
-                codigoField.set(entrada, rs.getString("codigo"));
+                Entrada entrada = new Entrada(
+                        rs.getString("codigo"), evento, cliente
+                );
 
                 entradas.add(entrada);
             }
 
-        } catch (Exception e) {
-            System.out.println("❌ Error al obtener entradas: " + e.getMessage());
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al obtener entradas: " + e.getMessage(), e);
         }
 
         return entradas;
