@@ -14,6 +14,8 @@ import fcva.dev.util.PDFExporter;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -222,6 +224,16 @@ public class AppDashboard extends JFrame {
 
         limpiarBtn.addActionListener(e -> limpiarFormulario());
 
+        buscarField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (buscarField.getText().trim().isEmpty()) {
+                    cargarEventos(); // ← muestra todos los eventos otra vez
+                }
+            }
+        });
+
+
         buscarBtn.addActionListener(e -> {
             String filtro = buscarField.getText().trim().toLowerCase();
             modeloTabla.setRowCount(0);
@@ -229,11 +241,16 @@ public class AppDashboard extends JFrame {
             for (Evento ev : eventos) {
                 if (ev.getNombre().toLowerCase().contains(filtro)) {
                     modeloTabla.addRow(new Object[]{
-                            ev.getId(), ev.getNombre(), ev.getFecha(), ev.getLugar(), ev.getEntradasDisponibles()
+                            ev.getId(),
+                            ev.getNombre(),
+                            ev.getFecha(),
+                            ev.getLugar(),
+                            ev.getEntradasDisponibles()
                     });
                 }
             }
         });
+
     }
 
     private void limpiarFormulario() {
@@ -278,6 +295,8 @@ public class AppDashboard extends JFrame {
 
         JButton comprarBtn = new JButton("Comprar Entrada");
         JButton pdfBtn = new JButton("Exportar PDF");
+        JButton listarBtn = new JButton("Listar por evento");
+        JButton exportarListaBtn = new JButton("Exportar lista de clientes");
 
         actualizarComboEventos(eventoCombo);
 
@@ -289,6 +308,9 @@ public class AppDashboard extends JFrame {
         formPanel.add(clienteEmailField);
         formPanel.add(comprarBtn);
         formPanel.add(pdfBtn);
+        formPanel.add(listarBtn);
+        formPanel.add(exportarListaBtn);
+
 
         panel.add(formPanel, BorderLayout.NORTH);
         panel.add(new JScrollPane(resultadoArea), BorderLayout.CENTER);
@@ -348,6 +370,45 @@ public class AppDashboard extends JFrame {
                 PDFExporter.exportar(entradaGenerada[0]);
             }
         });
+
+        listarBtn.addActionListener(e -> {
+            String eventoNombre = (String) eventoCombo.getSelectedItem();
+            if (eventoNombre == null) {
+                resultadoArea.setText("⚠️ Selecciona un evento.");
+                return;
+            }
+
+            List<Entrada> entradas = entradaDAO.obtenerTodas();
+            StringBuilder sb = new StringBuilder("📋 Clientes que compraron entrada para: " + eventoNombre + "\n\n");
+
+            boolean encontrado = false;
+            for (Entrada entrada : entradas) {
+                if (entrada.getEvento().getNombre().equals(eventoNombre)) {
+                    sb.append("👤 ").append(entrada.getCliente().getNombre())
+                            .append(" - ").append(entrada.getCliente().getEmail())
+                            .append("\n");
+                    encontrado = true;
+                }
+            }
+
+            if (!encontrado) {
+                sb.append("❌ No hay compras registradas para este evento.");
+            }
+
+            resultadoArea.setText(sb.toString());
+        });
+
+        exportarListaBtn.addActionListener(e -> {
+            String eventoNombre = (String) eventoCombo.getSelectedItem();
+            if (eventoNombre == null) {
+                JOptionPane.showMessageDialog(this, "Seleccione un evento.", "⚠️ Advertencia", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            List<Entrada> entradas = entradaDAO.obtenerTodas();
+            PDFExporter.exportarListaClientes(eventoNombre, entradas);
+        });
+
 
         return panel;
     }
