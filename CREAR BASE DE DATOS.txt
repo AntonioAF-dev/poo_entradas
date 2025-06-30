@@ -1,0 +1,92 @@
+-- AntonioAF-Dev dbapp para POO
+
+-- Crear base de datos
+CREATE DATABASE IF NOT EXISTS dbapp;
+USE dbapp;
+
+-- Tabla de vendedores (login)
+CREATE TABLE IF NOT EXISTS vendedores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100),
+    usuario VARCHAR(50),
+    contrasena VARCHAR(100)
+);
+
+-- Insertar usuario por defecto
+INSERT INTO vendedores (nombre, usuario, contrasena)
+VALUES ('Administrador', 'admin', '1234');
+
+-- Tabla de eventos
+CREATE TABLE IF NOT EXISTS eventos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100),
+    fecha VARCHAR(20),
+    lugar VARCHAR(100),
+    total_entradas INT
+);
+
+
+-- Insertar eventos de ejemplo 
+-- quitar el /* */ para ejecutar esto
+/*
+INSERT INTO eventos (nombre, fecha, lugar, total_entradas) VALUES
+('Concierto RockFest', '15/07/2025', 'Estadio Nacional', 5),
+('Feria Tecnológica', '30/08/2025', 'Centro de Convenciones', 3),
+('Obra de Teatro', '22/09/2025', 'Teatro Principal', 2),
+('Festival de Jazz', '10/07/2025', 'Parque Central', 8),
+('Exposición de Arte', '05/08/2025', 'Galería Cultural', 4),
+('Cine al Aire Libre', '12/07/2025', 'Plaza Mayor', 6),
+('Torneo de Ajedrez', '20/07/2025', 'Casa de la Juventud', 7),
+('Competencia de Baile', '25/08/2025', 'Coliseo Municipal', 9),
+('Seminario de Salud', '03/09/2025', 'Auditorio Regional', 3),
+('Festival Gastronómico', '14/09/2025', 'Campo Ferial', 10),
+('Noche de Stand-Up', '18/07/2025', 'Teatro del Pueblo', 5),
+('Conferencia de Negocios', '09/08/2025', 'Hotel Central', 6),
+('Taller de Robótica', '17/08/2025', 'Instituto Tecnológico', 4),
+('Encuentro Literario', '11/09/2025', 'Biblioteca Municipal', 5),
+('Feria del Libro', '01/08/2025', 'Centro Cultural', 8),
+('Concierto Pop', '07/09/2025', 'Estadio de la Juventud', 9),
+('Festival de Cómics', '29/07/2025', 'Centro de Exposiciones', 3),
+('Carrera 5K', '23/08/2025', 'Avenida Principal', 7),
+('Ciclo de Cine Clásico', '06/09/2025', 'Cine Municipal', 6),
+('Obra Infantil', '16/08/2025', 'Sala de Teatro Joven', 2),
+('Show de Magia', '21/07/2025', 'Auditorio Infantil', 5),
+('Taller de Fotografía', '02/08/2025', 'Casa de la Cultura', 4),
+('Curso de Cocina', '19/08/2025', 'Escuela Gastronómica', 5),
+('Encuentro de Startups', '28/08/2025', 'Universidad Nacional', 8),
+('Festival de Danza', '31/08/2025', 'Coliseo Regional', 10),
+('Concierto de Reggae', '08/08/2025', 'Club Musical', 7),
+('Evento Anime', '13/09/2025', 'Centro de Convenciones', 9),
+('Campamento Juvenil', '26/07/2025', 'Área Recreativa Sur', 6),
+('Festival de Folklore', '04/09/2025', 'Plaza de Armas', 8),
+('Feria de Universidades', '24/07/2025', 'Colegio Mayor', 4),
+('Torneo de Videojuegos', '27/08/2025', 'Salón Gamer', 10),
+('Concierto Electrónico', '30/07/2025', 'Parque de la Música', 7),
+('Exposición Científica', '15/08/2025', 'Planetario Local', 5),
+('Taller de Escritura', '01/09/2025', 'Centro Cultural Norte', 3),
+('Noche de Talentos', '20/08/2025', 'Escuela Municipal', 6),
+('Feria Artesanal', '12/08/2025', 'Pabellón Norte', 9),
+('Torneo Escolar', '09/09/2025', 'Cancha Principal', 4),
+('Desfile de Moda', '07/08/2025', 'Hotel Boutique', 8),
+('Festival Medieval', '05/09/2025', 'Castillo del Sol', 10),
+('Show de Títeres', '22/07/2025', 'Teatro Infantil', 3),
+('Expo Emprendedores', '10/08/2025', 'Centro Comercial Sur', 5),
+('Caminata Familiar', '19/07/2025', 'Sendero Ecológico', 6),
+('Festival de Mascotas', '16/09/2025', 'Parque Animal', 7),
+('Charla Motivacional', '18/08/2025', 'Auditorio Sur', 4),
+('Cine Debate', '13/08/2025', 'Salón Cultural', 2),
+('Noche de Ciencia', '17/07/2025', 'Laboratorio Central', 6),
+('Concierto Acústico', '29/08/2025', 'Café Cultural', 5),
+('Festival de Impro', '23/07/2025', 'Teatro Experimental', 4),
+('Cierre de Temporada', '02/09/2025', 'Coliseo Mayor', 9),
+('Torneo Regional', '06/08/2025', 'Estadio del Sur', 8);
+*/
+
+-- Tabla de entradas
+CREATE TABLE IF NOT EXISTS entradas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    codigo VARCHAR(20),
+    cliente_nombre VARCHAR(100),
+    cliente_email VARCHAR(100),
+    evento_nombre VARCHAR(100)
+);
